@@ -46,12 +46,11 @@ class MigrationServices:
             if vendor_code in unique_vendor_codes:
                 duplicated_products.append(product)
             else:
+                unique_vendor_codes.append(vendor_code)
                 unique_products.append(product)
         print(len(unique_products))
         print(len(duplicated_products))
-        print(1)
         await self.wb_api_utils.edit_products(token_auth=to_shop_auth, products=unique_products)
-        print(1)
         await self.wb_api_utils.edit_products(token_auth=to_shop_auth, products=duplicated_products)
 
     async def get_product_chars_by_nm_ids(self, token_auth, nm_ids, column_prefix: str) -> pd.DataFrame:
