@@ -33,8 +33,22 @@ class MigrationServices:
             to_product: dict = df['to_product'][index]
 
             to_product['characteristics'] = from_product['characteristics']
+            to_product['mediaFiles'] = from_product['mediaFiles']
+
             products_to_be_imported.append(to_product)
-        await self.wb_api_utils.edit_products(token_auth=to_shop_auth, products=products_to_be_imported)
+
+        unique_vendor_codes = []
+        unique_products = []
+        duplicated_products = []
+
+        for product in products_to_be_imported:
+            vendor_code = product.get('vendorCode')
+            if vendor_code in unique_vendor_codes:
+                duplicated_products.append(product)
+            else:
+                unique_products.append(product)
+        await self.wb_api_utils.edit_products(token_auth=to_shop_auth, products=unique_products)
+        await self.wb_api_utils.edit_products(token_auth=to_shop_auth, products=duplicated_products)
 
     async def get_product_chars_by_nm_ids(self, token_auth, nm_ids, column_prefix: str) -> pd.DataFrame:
         products_df = pd.DataFrame([
