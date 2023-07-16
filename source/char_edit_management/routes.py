@@ -17,7 +17,7 @@ async def migrate_characteristics(from_shop_id: int, to_shop_id: int, file: byte
     from_nm_id_column = df['Артикул WB 1'].name
     to_nm_id_column = df['Артикул WB 2'].name
     df = df.dropna(subset=[from_nm_id_column, to_nm_id_column])
-    df = df.drop_duplicates(subset=[from_nm_id_column, to_nm_id_column])
+    df = df.drop_duplicates(subset=[from_nm_id_column])
 
     from_shop = await migration_services.shop_queries.get_shop_by_id(shop_id=from_shop_id)
     to_shop = await migration_services.shop_queries.get_shop_by_id(shop_id=to_shop_id)
