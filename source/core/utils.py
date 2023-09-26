@@ -17,6 +17,7 @@ class BaseUtils:
         async with aiohttp.ClientSession(trust_env=True, headers=headers) as session:
             async with session.post(url=url, json=payload) as response:
                 print(response.status)
+                print(await response.text())
                 if response.status == 200:
                     return json.loads(await response.text())
 
