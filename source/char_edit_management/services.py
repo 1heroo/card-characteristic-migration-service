@@ -86,7 +86,10 @@ class MigrationServices:
             to_product['characteristics'] = from_product['characteristics']
             to_product['mediaFiles'] = from_product['mediaFiles']
             products_to_be_imported.append(to_product)
-        await self.wb_api_utils.edit_products(token_auth=to_shop_auth, products=products_to_be_imported)
+        unique_vendors = dict()
+        for product in products_to_be_imported:
+            unique_vendors[product.get('vendorCode')] = product
+        await self.wb_api_utils.edit_products(token_auth=to_shop_auth, products=list(unique_vendors.values()))
 
 
     async def get_all_product_chars(self, token_auth, column_prefix: str) -> pd.DataFrame:
