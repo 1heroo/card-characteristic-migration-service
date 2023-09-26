@@ -68,3 +68,38 @@ class MigrationServices:
             for product in products
         ])
 
+    async def migrate_chars_full_shop(self, from_shop: Shop, to_shop: Shop):
+
+        from_shop_auth = self.wb_api_utils.auth(api_key=from_shop.standard_api_key)
+        to_shop_auth = self.wb_api_utils.auth(api_key=to_shop.standard_api_key)
+
+        from_chars_df = await self.get_all_product_chars(token_auth=from_shop_auth, column_prefix='from')
+        to_chars_df = await self.get_all_product_chars(token_auth=to_shop_auth, column_prefix='to')
+
+        df = pd.merge(from_chars_df, to_chars_df, how='inner', left_on='from_vendor_code', right_on='to_vendor_code')
+
+        products_to_be_imported = []
+        for index in df.index:
+            from_product: dict = df['from_product'][index]
+            to_product: dict = df['to_product'][index]
+
+            to_product['characteristics'] = from_product['characteristics']
+            to_product['mediaFiles'] = from_product['mediaFiles']
+            products_to_be_imported.append(to_product)
+        await self.wb_api_utils.edit_products(token_auth=to_shop_auth, products=products_to_be_imported)
+
+
+    async def get_all_product_chars(self, token_auth, column_prefix: str) -> pd.DataFrame:
+        products_df = pd.DataFrame([
+            {
+                'vendor_code': product.get('vendorCode'),
+                'nm_id': product.get('nmID')
+            }
+            for product in await self.wb_api_utils.get_products(token_auth=token_auth)
+        ])
+
+        products = await self.wb_api_utils.get_chars_by_vendor_codes(vendor_codes=list(products_df['vendor_code']), token_auth=token_auth)
+        return pd.DataFrame([
+            {f'{column_prefix}_product': product, f'{column_prefix}_vendor_code': product.get('vendorCode')}
+            for product in products
+        ])

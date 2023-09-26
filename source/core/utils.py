@@ -16,7 +16,8 @@ class BaseUtils:
     async def make_post_request(url, headers, payload):
         async with aiohttp.ClientSession(trust_env=True, headers=headers) as session:
             async with session.post(url=url, json=payload) as response:
-                if response.status == 200 or 400:
+                print(response.status)
+                if response.status == 200:
                     return json.loads(await response.text())
 
     @staticmethod
