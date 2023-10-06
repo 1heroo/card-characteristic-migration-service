@@ -94,7 +94,6 @@ class MigrationServices:
 
         # await self.wb_api_utils.edit_products(token_auth=to_shop_auth, products=list(unique_vendors.values()))
 
-
     async def get_all_product_chars(self, token_auth, column_prefix: str, brand) -> pd.DataFrame:
         products_df = pd.DataFrame([
             {
