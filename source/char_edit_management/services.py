@@ -74,7 +74,7 @@ class MigrationServices:
         to_shop_auth = self.wb_api_utils.auth(api_key=to_shop.standard_api_key)
 
         from_chars_df = await self.get_all_product_chars(token_auth=from_shop_auth, column_prefix='from', brand=brand)
-        to_chars_df = await self.get_all_product_chars(token_auth=to_shop_auth, column_prefix='to')
+        to_chars_df = await self.get_all_product_chars(token_auth=to_shop_auth, column_prefix='to', brand=brand)
 
         print(from_chars_df)
         df = pd.merge(from_chars_df, to_chars_df, how='inner', left_on='from_vendor_code', right_on='to_vendor_code')
