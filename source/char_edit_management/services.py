@@ -92,14 +92,13 @@ class MigrationServices:
             unique_vendors[product.get('vendorCode')] = product
 
 
-        # await self.wb_api_utils.edit_products(token_auth=to_shop_auth, products=list(unique_vendors.values()))
+        await self.wb_api_utils.edit_products(token_auth=to_shop_auth, products=list(unique_vendors.values()))
 
     async def get_all_product_chars(self, token_auth, column_prefix: str, brand = None) -> pd.DataFrame:
         products = await self.wb_api_utils.get_products(token_auth=token_auth)
         if brand:
             products = [product for product in products if product.get('brand') == brand]
 
-        print(products.__len__())
         products_df = pd.DataFrame([
             {
                 'vendor_code': product.get('vendorCode'),
