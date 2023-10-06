@@ -33,14 +33,14 @@ async def migrate_characteristics(from_shop_id: int, to_shop_id: int, file: byte
 
 
 @router.post('/migrate-characteristics/{from_shop_id}/{to_shop_id}/full-shop')
-async def migrate_chars(from_shop_id: int, to_shop_id: int):
+async def migrate_chars(from_shop_id: int, to_shop_id: int, brand: str = None):
     from_shop = await migration_services.shop_queries.get_shop_by_id(shop_id=from_shop_id)
     to_shop = await migration_services.shop_queries.get_shop_by_id(shop_id=to_shop_id)
 
     if from_shop is None or to_shop is None:
         return JSONResponse(content={'message': 'Один из магазинов не найден'}, status_code=status.HTTP_404_NOT_FOUND)
 
-    await migration_services.migrate_chars_full_shop(from_shop=from_shop, to_shop=to_shop)
+    await migration_services.migrate_chars_full_shop(from_shop=from_shop, to_shop=to_shop, brand=brand)
 
     return PlainTextResponse(
         content=f'С магазина {from_shop.title} на магазин {to_shop.title} характеристики введенных товаров успешно перенесены')

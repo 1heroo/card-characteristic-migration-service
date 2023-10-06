@@ -68,14 +68,15 @@ class MigrationServices:
             for product in products
         ])
 
-    async def migrate_chars_full_shop(self, from_shop: Shop, to_shop: Shop):
+    async def migrate_chars_full_shop(self, from_shop: Shop, to_shop: Shop, brand):
 
         from_shop_auth = self.wb_api_utils.auth(api_key=from_shop.standard_api_key)
         to_shop_auth = self.wb_api_utils.auth(api_key=to_shop.standard_api_key)
 
-        from_chars_df = await self.get_all_product_chars(token_auth=from_shop_auth, column_prefix='from')
+        from_chars_df = await self.get_all_product_chars(token_auth=from_shop_auth, column_prefix='from', brand=brand)
         to_chars_df = await self.get_all_product_chars(token_auth=to_shop_auth, column_prefix='to')
 
+        print(from_chars_df)
         df = pd.merge(from_chars_df, to_chars_df, how='inner', left_on='from_vendor_code', right_on='to_vendor_code')
 
         products_to_be_imported = []
@@ -89,16 +90,19 @@ class MigrationServices:
         unique_vendors = dict()
         for product in products_to_be_imported:
             unique_vendors[product.get('vendorCode')] = product
-        await self.wb_api_utils.edit_products(token_auth=to_shop_auth, products=list(unique_vendors.values()))
 
 
-    async def get_all_product_chars(self, token_auth, column_prefix: str) -> pd.DataFrame:
+        # await self.wb_api_utils.edit_products(token_auth=to_shop_auth, products=list(unique_vendors.values()))
+
+
+    async def get_all_product_chars(self, token_auth, column_prefix: str, brand) -> pd.DataFrame:
         products_df = pd.DataFrame([
             {
                 'vendor_code': product.get('vendorCode'),
                 'nm_id': product.get('nmID')
             }
             for product in await self.wb_api_utils.get_products(token_auth=token_auth)
+            if brand is not None and product.get('brand') == brand
         ])
 
         products = await self.wb_api_utils.get_chars_by_vendor_codes(vendor_codes=list(products_df['vendor_code']), token_auth=token_auth)
@@ -106,3 +110,9 @@ class MigrationServices:
             {f'{column_prefix}_product': product, f'{column_prefix}_vendor_code': product.get('vendorCode')}
             for product in products
         ])
+
+    async def define_brand_by_chars(self, characteristics: list[dict]):
+        for char in characteristics:
+            for name, value in char.items():
+                if name == 'Бренд':
+                    return value
