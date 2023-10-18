@@ -86,11 +86,13 @@ class MigrationServices:
 
             to_product['characteristics'] = from_product['characteristics']
             to_product['mediaFiles'] = from_product['mediaFiles']
+            print(to_product['mediaFiles'], 'to_product')
+            print(from_product['mediaFiles'], 'from_product')
+
             products_to_be_imported.append(to_product)
         unique_vendors = dict()
         for product in products_to_be_imported:
             unique_vendors[product.get('vendorCode')] = product
-
 
         await self.wb_api_utils.edit_products(token_auth=to_shop_auth, products=list(unique_vendors.values()))
 
