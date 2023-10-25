@@ -68,12 +68,12 @@ class MigrationServices:
             for product in products
         ])
 
-    async def migrate_chars_full_shop(self, from_shop: Shop, to_shop: Shop, brand):
+    async def migrate_chars_full_shop(self, from_shop: Shop, to_shop: Shop, brands):
 
         from_shop_auth = self.wb_api_utils.auth(api_key=from_shop.standard_api_key)
         to_shop_auth = self.wb_api_utils.auth(api_key=to_shop.standard_api_key)
 
-        from_chars_df = await self.get_all_product_chars(token_auth=from_shop_auth, column_prefix='from', brand=brand)
+        from_chars_df = await self.get_all_product_chars(token_auth=from_shop_auth, column_prefix='from', brands=brands)
         to_chars_df = await self.get_all_product_chars(token_auth=to_shop_auth, column_prefix='to')
 
         print(from_chars_df)
@@ -90,17 +90,17 @@ class MigrationServices:
             print(to_product.get('vendorCode'))
             await self.wb_api_utils.change_images(vendor_code=to_product.get('vendorCode'), token_auth=to_shop_auth, images_list=from_product['mediaFiles'])
 
-        #     products_to_be_imported.append(to_product)
-        # unique_vendors = dict()
-        # for product in products_to_be_imported:
-        #     unique_vendors[product.get('vendorCode')] = product
-        #
-        # await self.wb_api_utils.edit_products(token_auth=to_shop_auth, products=list(unique_vendors.values()))
+            products_to_be_imported.append(to_product)
+        unique_vendors = dict()
+        for product in products_to_be_imported:
+            unique_vendors[product.get('vendorCode')] = product
 
-    async def get_all_product_chars(self, token_auth, column_prefix: str, brand = None) -> pd.DataFrame:
+        await self.wb_api_utils.edit_products(token_auth=to_shop_auth, products=list(unique_vendors.values()))
+
+    async def get_all_product_chars(self, token_auth, column_prefix: str, brands = None) -> pd.DataFrame:
         products = await self.wb_api_utils.get_products(token_auth=token_auth)
-        if brand:
-            products = [product for product in products if product.get('brand') == brand]
+        if brands:
+            products = [product for product in products if product.get('brand') in brands]
 
         products_df = pd.DataFrame([
             {
