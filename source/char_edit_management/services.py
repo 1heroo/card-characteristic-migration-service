@@ -92,8 +92,7 @@ class MigrationServices:
             to_product['title'] = from_product.get('title')
             to_product['photos'] = from_product.get('photos')
             products.append(to_product)
-            await self.wb_api_utils.change_images(vendor_code=to_product.get('vendorCode'), token_auth=to_shop_auth, images_list=[item['big'] for item in from_product['photos']])
-            print(index)
+            # await self.wb_api_utils.change_images(vendor_code=to_product.get('vendorCode'), token_auth=to_shop_auth, images_list=[item['big'] for item in from_product['photos']])
 
         await self.wb_api_utils.edit_products(token_auth=to_shop_auth, products=products)
 
