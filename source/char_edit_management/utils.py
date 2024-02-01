@@ -53,7 +53,8 @@ class WbApiUtils(BaseUtils):
 
     async def edit_products(self, products: list[dict], token_auth: dict):
         url = 'https://suppliers-api.wildberries.ru/content/v2/cards/update'
-        await self.make_post_request(url=url, headers=token_auth, payload=products, print_data=True)
+        for index in range(0, len(products), 100):
+            await self.make_post_request(url=url, headers=token_auth, payload=products[index: index + 100], print_data=True)
 
 
     async def change_images(self, vendor_code: str, token_auth: dict, images_list):
