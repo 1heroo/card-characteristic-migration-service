@@ -80,7 +80,7 @@ class MigrationServices:
         df = pd.merge(from_chars_df, to_chars_df, how='inner', left_on='from_vendor_code', right_on='to_vendor_code')
 
         df = df.drop_duplicates(subset=['to_vendor_code'])
-
+        print(df)
         for index in df.index:
             from_product: dict = df['from_product'][index]
             to_product: dict = df['to_product'][index]
@@ -93,6 +93,7 @@ class MigrationServices:
 
             await self.wb_api_utils.change_images(vendor_code=to_product.get('vendorCode'), token_auth=to_shop_auth, images_list=[item['big'] for item in from_product['photos']])
             await self.wb_api_utils.edit_products(token_auth=to_shop_auth, products=[to_product])
+            print(index)
 
     async def get_all_product_chars(self, token_auth, column_prefix: str, brands = None) -> pd.DataFrame:
         products = await self.wb_api_utils.get_products(token_auth=token_auth)
