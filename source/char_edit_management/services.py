@@ -74,8 +74,7 @@ class MigrationServices:
 
         from_chars = await self.wb_api_utils.get_products(token_auth=from_shop_auth, brands=brands)
         to_chars = await self.wb_api_utils.get_products(token_auth=to_shop_auth, brands=brands)
-        from_chars = [i for i in from_chars if i.get('nmID') == 202038478]
-        print(from_chars)
+
         from_chars_df = pd.DataFrame(list(map(lambda item: {'from_vendor_code': item.get('vendorCode'), 'from_product': item}, from_chars)))
         to_chars_df = pd.DataFrame(list(map(lambda item: {'to_vendor_code': item.get('vendorCode'), 'to_product': item}, to_chars)))
         df = pd.merge(from_chars_df, to_chars_df, how='inner', left_on='from_vendor_code', right_on='to_vendor_code')
@@ -92,8 +91,8 @@ class MigrationServices:
             to_product['title'] = from_product['title']
             to_product['photos'] = from_product['photos']
 
-            await self.wb_api_utils.change_images(vendor_code=to_product.get('vendorCode'), token_auth=to_shop_auth, images_list=from_product['photos'])
-            await self.wb_api_utils.edit_products(token_auth=to_shop_auth, products=[products_to_be_imported])
+            await self.wb_api_utils.change_images(vendor_code=to_product.get('vendorCode'), token_auth=to_shop_auth, images_list=[item['big'] for item in from_product['photos']])
+            await self.wb_api_utils.edit_products(token_auth=to_shop_auth, products=[to_product])
 
     async def get_all_product_chars(self, token_auth, column_prefix: str, brands = None) -> pd.DataFrame:
         products = await self.wb_api_utils.get_products(token_auth=token_auth)
