@@ -51,13 +51,10 @@ class WbApiUtils(BaseUtils):
                 output_data += data.get('data', [])
         return output_data
 
-    async def edit_products(self, token_auth: dict, products: list[dict]):
-        url = 'https://suppliers-api.wildberries.ru/content/v1/cards/update'
+    async def edit_products(self, products: list[dict], token_auth: dict):
+        url = 'https://suppliers-api.wildberries.ru/content/v2/cards/update'
+        await self.make_post_request(url=url, headers=token_auth, payload=products)
 
-        for index in range(0, len(products), 1000):
-            chunk_products = products[index: index + 1000]
-            data = await self.make_post_request(payload=chunk_products, headers=token_auth, url=url)
-            print(data)
 
     async def change_images(self, vendor_code: str, token_auth: dict, images_list):
         url = 'https://suppliers-api.wildberries.ru/content/v1/media/save'
