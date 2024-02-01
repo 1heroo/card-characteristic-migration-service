@@ -74,7 +74,7 @@ class MigrationServices:
 
         from_chars = await self.wb_api_utils.get_products(token_auth=from_shop_auth, brands=brands)
         to_chars = await self.wb_api_utils.get_products(token_auth=to_shop_auth, brands=brands)
-        to_chars = [i for i in to_chars if i.get('nmID') == 207191962]
+
         from_chars_df = pd.DataFrame(list(map(lambda item: {'from_vendor_code': item.get('vendorCode'), 'from_product': item}, from_chars)))
         to_chars_df = pd.DataFrame(list(map(lambda item: {'to_vendor_code': item.get('vendorCode'), 'to_product': item}, to_chars)))
         df = pd.merge(from_chars_df, to_chars_df, how='inner', left_on='from_vendor_code', right_on='to_vendor_code')
