@@ -13,7 +13,7 @@ class WbApiUtils(BaseUtils):
             'Authorization': api_key
         }
 
-    async def get_products(self, token_auth: dict) -> list[dict]:
+    async def get_products(self, token_auth: dict, brands: list[str] = []) -> list[dict]:
         data = []
         url = 'https://suppliers-api.wildberries.ru/content/v2/get/cards/list'
         payload = {
@@ -23,7 +23,7 @@ class WbApiUtils(BaseUtils):
                 },
                 "filter": {
                     "withPhoto": -1,
-                    'brands': ['Einhell', 'EINHELL']
+                    'brands': brands
                 }
             }
         }

@@ -72,8 +72,8 @@ class MigrationServices:
         from_shop_auth = self.wb_api_utils.auth(api_key=from_shop.standard_api_key)
         to_shop_auth = self.wb_api_utils.auth(api_key=to_shop.standard_api_key)
 
-        from_chars = [item for item in await self.wb_api_utils.get_products(token_auth=from_shop_auth) if item.get('brand') in brands]
-        to_chars = await self.wb_api_utils.get_products(token_auth=to_shop_auth)
+        from_chars = await self.wb_api_utils.get_products(token_auth=from_shop_auth, brands=brands)
+        to_chars = await self.wb_api_utils.get_products(token_auth=to_shop_auth, brands=brands)
 
         from_chars_df = pd.DataFrame(list(map(lambda item: {'from_vendor_code': item.get('vendorCode'), 'from_product': item}, from_chars)))
         to_chars_df = pd.DataFrame(list(map(lambda item: {'to_vendor_code': item.get('vendorCode'), 'to_product': item}, to_chars)))
