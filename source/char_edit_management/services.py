@@ -85,11 +85,11 @@ class MigrationServices:
             from_product: dict = df['from_product'][index]
             to_product: dict = df['to_product'][index]
 
-            to_product['characteristics'] = from_product['characteristics']
-            to_product['description'] = from_product['description']
-            to_product['dimensions'] = from_product['dimensions']
-            to_product['title'] = from_product['title']
-            to_product['photos'] = from_product['photos']
+            to_product['characteristics'] = from_product.get('characteristics')
+            to_product['description'] = from_product.get('description')
+            to_product['dimensions'] = from_product.get('dimensions')
+            to_product['title'] = from_product.get('title')
+            to_product['photos'] = from_product.get('photos')
             print(to_product.keys())
             await self.wb_api_utils.change_images(vendor_code=to_product.get('vendorCode'), token_auth=to_shop_auth, images_list=[item['big'] for item in from_product['photos']])
             await self.wb_api_utils.edit_products(token_auth=to_shop_auth, products=[to_product])
