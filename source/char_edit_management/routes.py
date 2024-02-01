@@ -40,8 +40,10 @@ async def migrate_chars(from_shop_id: int, to_shop_id: int, brands: str = None):
     if from_shop is None or to_shop is None:
         return JSONResponse(content={'message': 'Один из магазинов не найден'}, status_code=status.HTTP_404_NOT_FOUND)
 
+    if brands:
+        brands = brands.split(', ')
+
     await migration_services.migrate_chars_full_shop(from_shop=from_shop, to_shop=to_shop, brands=brands)
 
     return PlainTextResponse(
         content=f'С магазина {from_shop.title} на магазин {to_shop.title} характеристики введенных товаров успешно перенесены')
-

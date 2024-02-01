@@ -15,27 +15,29 @@ class WbApiUtils(BaseUtils):
 
     async def get_products(self, token_auth: dict) -> list[dict]:
         data = []
-        url = 'https://suppliers-api.wildberries.ru/content/v1/cards/cursor/list'
+        url = 'https://suppliers-api.wildberries.ru/content/v2/get/cards/list'
         payload = {
-            "sort": {
+            "settings": {
                 "cursor": {
                     "limit": 1000
                 },
                 "filter": {
-                    "withPhoto": -1
+                    "withPhoto": -1,
+                    'brands': ['Einhell', 'EINHELL']
                 }
             }
         }
-        total = 1
-        while total != 0:
+
+        while True:
             partial_data = await self.make_post_request(headers=token_auth, url=url, payload=payload)
             if partial_data is None:
                 return data
 
-            data += partial_data['data']['cards']
-            cursor = partial_data['data']['cursor']
-            payload['sort']['cursor'].update(cursor)
-            total = cursor['total']
+            data += partial_data['cards']
+            payload['settings']['cursor']['updatedAt'] = partial_data['cursor']['updatedAt']
+            payload['settings']['cursor']['nmID'] = partial_data['cursor']['nmID']
+            if partial_data['cards'].__len__() < 1000:
+                break
         return data
 
     async def get_chars_by_vendor_codes(self, token_auth: dict, vendor_codes: list[dict]):
