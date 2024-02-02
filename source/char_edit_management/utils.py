@@ -63,4 +63,4 @@ class WbApiUtils(BaseUtils):
             "data": images_list
         }
         await self.make_post_request(url=url, headers=token_auth, payload=payload, print_data=True)
-        print(f'len {images_list}: {len(images_list)}; vendor_code: {vendor_code}')
+        print(f'len images_list: {len(images_list)}; vendor_code: {vendor_code}')

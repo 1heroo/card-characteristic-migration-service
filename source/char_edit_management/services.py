@@ -94,7 +94,7 @@ class MigrationServices:
 
             images = [item['big'] for item in from_product.get('photos', [])]
 
-            if len(images) != len(to_product.get('photos', [])):
+            if len(images) != len(to_product.get('photos', [])) and len(images) != 0:
                 await self.wb_api_utils.change_images(vendor_code=to_product.get('vendorCode'), token_auth=to_shop_auth, images_list=images)
             print(index)
 
