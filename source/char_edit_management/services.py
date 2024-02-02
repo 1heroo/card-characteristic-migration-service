@@ -92,7 +92,7 @@ class MigrationServices:
             to_product['title'] = from_product.get('title')
             products.append(to_product)
 
-            images = [item['big'] for item in from_product['photos']]
+            images = [item['big'] for item in from_product.get('photos', [])]
 
             if len(images) != len(to_product.get('photos', [])):
                 await self.wb_api_utils.change_images(vendor_code=to_product.get('vendorCode'), token_auth=to_shop_auth, images_list=images)
