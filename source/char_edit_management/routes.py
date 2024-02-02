@@ -1,5 +1,5 @@
 import pandas as pd
-from fastapi import APIRouter, File
+from fastapi import APIRouter, File, Query
 from starlette import status
 from starlette.responses import JSONResponse, Response, PlainTextResponse
 
@@ -42,7 +42,7 @@ async def migrate_chars(from_shop_id: int, to_shop_id: int, brands: str = None):
 
     if brands:
         brands = brands.split(', ')
-
+    print(brands)
     await migration_services.migrate_chars_full_shop(from_shop=from_shop, to_shop=to_shop, brands=brands)
 
     return PlainTextResponse(
