@@ -12,7 +12,7 @@ router = APIRouter(prefix='/characteristic-migration')
 
 
 @router.post('/migrate-characteristics/{from_shop_id}/{to_shop_id}')
-async def migrate_characteristics(from_shop_id: int, to_shop_id: int, file: bytes = File()):
+async def migrate_characteristics(vendor_code_prefix: str, from_shop_id: int, to_shop_id: int, file: bytes = File()):
     df = pd.read_excel(file)
     from_nm_id_column = df['Артикул WB 1'].name
     to_nm_id_column = df['Артикул WB 2'].name
@@ -26,7 +26,8 @@ async def migrate_characteristics(from_shop_id: int, to_shop_id: int, file: byte
         return JSONResponse(content={'message': 'Один из магазинов не найден'}, status_code=status.HTTP_404_NOT_FOUND)
 
     await migration_services.migrate_chars(
-        df=df, from_shop=from_shop, to_shop=to_shop, from_nm_id_column=from_nm_id_column, to_nm_id_column=to_nm_id_column)
+        df=df, from_shop=from_shop, to_shop=to_shop, vendor_code_prefix=vendor_code_prefix,
+        from_nm_id_column=from_nm_id_column, to_nm_id_column=to_nm_id_column)
 
     return PlainTextResponse(
         content=f'С магазина {from_shop.title} на магазин {to_shop.title} характеристики введенных товаров успешно перенесены')

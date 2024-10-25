@@ -15,11 +15,11 @@ class WbApiUtils(BaseUtils):
 
     async def get_products(self, token_auth: dict, brands: list[str] = []) -> list[dict]:
         data = []
-        url = 'https://suppliers-api.wildberries.ru/content/v2/get/cards/list'
+        url = 'https://content-api.wildberries.ru/content/v2/get/cards/list'
         payload = {
             "settings": {
                 "cursor": {
-                    "limit": 1000
+                    "limit": 100
                 },
                 "filter": {
                     "withPhoto": -1,
@@ -36,7 +36,7 @@ class WbApiUtils(BaseUtils):
             data += partial_data['cards']
             payload['settings']['cursor']['updatedAt'] = partial_data['cursor']['updatedAt']
             payload['settings']['cursor']['nmID'] = partial_data['cursor']['nmID']
-            if partial_data['cards'].__len__() < 1000:
+            if partial_data['cards'].__len__() < 100:
                 break
         return data
 
@@ -52,15 +52,10 @@ class WbApiUtils(BaseUtils):
         return output_data
 
     async def edit_products(self, products: list[dict], token_auth: dict):
-        url = 'https://suppliers-api.wildberries.ru/content/v2/cards/update'
-        for index in range(0, len(products), 100):
-            await self.make_post_request(url=url, headers=token_auth, payload=products[index: index + 100], print_data=True)
+        url = 'https://content-api.wildberries.ru/content/v2/cards/update'
+        for index in range(0, len(products), 3000):
+            await self.make_post_request(url=url, headers=token_auth, payload=products[index: index + 3000], print_data=True)
 
-    async def change_images(self, vendor_code: str, token_auth: dict, images_list):
-        url = 'https://suppliers-api.wildberries.ru/content/v1/media/save'
-        payload = {
-            "vendorCode": vendor_code,
-            "data": images_list
-        }
-        await self.make_post_request(url=url, headers=token_auth, payload=payload, print_data=True)
-        print(f'len images_list: {len(images_list)}; vendor_code: {vendor_code}')
+    async def change_images(self, image_obj: dict, token_auth: dict):
+        url = 'https://content-api.wildberries.ru/content/v3/media/save'
+        await self.make_post_request(url=url, headers=token_auth, payload=image_obj, print_data=True)

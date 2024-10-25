@@ -13,7 +13,9 @@ class MigrationServices:
 
         self.shop_queries = ShopQueries()
 
-    async def migrate_chars(self, df: pd.DataFrame, from_nm_id_column: str, to_nm_id_column: str,
+    async def migrate_chars(self, df: pd.DataFrame, from_nm_id_column: str,
+                            vendor_code_prefix: str,
+                            to_nm_id_column: str,
                             from_shop: Shop, to_shop: Shop):
 
         from_shop_auth = self.wb_api_utils.auth(api_key=from_shop.standard_api_key)
@@ -21,21 +23,39 @@ class MigrationServices:
 
         from_chars_df = await self.get_product_chars_by_nm_ids(
             token_auth=from_shop_auth, nm_ids=list(df[from_nm_id_column]), column_prefix='from')
-        to_cars_df = await self.get_product_chars_by_nm_ids(
-            token_auth=to_shop_auth, nm_ids=list(df[to_nm_id_column]), column_prefix='to')
+        to_chars_df = await self.get_product_chars_by_nm_ids(
+                token_auth=to_shop_auth, nm_ids=list(df[to_nm_id_column]), column_prefix='to')
 
         df = df.merge(right=from_chars_df, how='inner', left_on=from_nm_id_column, right_on='from_nm_id')\
-            .merge(right=to_cars_df, how='inner', left_on=to_nm_id_column, right_on='to_nm_id')
+            .merge(right=to_chars_df, how='inner', left_on=to_nm_id_column, right_on='to_nm_id')
 
         products_to_be_imported = []
+        images_to_be_updated = []
+
         for index in df.index:
             from_product: dict = df['from_product'][index]
             to_product: dict = df['to_product'][index]
 
             to_product['characteristics'] = from_product['characteristics']
-            to_product['mediaFiles'] = from_product['mediaFiles']
-
+            to_product['title'] = from_product['title']
+            to_product['brand'] = from_product['brand']
+            to_product['description'] = from_product['description']
+            to_product['dimensions'] = from_product['dimensions']
             products_to_be_imported.append(to_product)
+
+            img_obj = {
+                'nmId': to_product.get('nmID'),
+                'data': [
+                    photo.get('big')
+                    for photo in from_product.get('photos', [])
+                ]
+            }
+            video = from_product.get('video')
+            if video:
+                img_obj['data'].append(video)
+
+            images_to_be_updated.append(img_obj)
+
 
         unique_vendor_codes = []
         unique_products = []
@@ -48,24 +68,29 @@ class MigrationServices:
             else:
                 unique_vendor_codes.append(vendor_code)
                 unique_products.append(product)
+
         print(len(unique_products))
         print(len(duplicated_products))
+        print(images_to_be_updated)
         await self.wb_api_utils.edit_products(token_auth=to_shop_auth, products=unique_products)
         await self.wb_api_utils.edit_products(token_auth=to_shop_auth, products=duplicated_products)
+
+        for img_obj in images_to_be_updated:
+            await self.wb_api_utils.change_images(img_obj, token_auth=to_shop_auth)
 
     async def get_product_chars_by_nm_ids(self, token_auth, nm_ids, column_prefix: str) -> pd.DataFrame:
         products_df = pd.DataFrame([
             {
-                'vendor_code': product.get('vendorCode'),
-                'nm_id': product.get('nmID')
+                'product': product,
+                'nm_id': int(product.get('nmID', 0))
             }
             for product in await self.wb_api_utils.get_products(token_auth=token_auth)
-        ])
-        df = pd.merge(pd.DataFrame(nm_ids, columns=['nm_id']), products_df, how='inner', on='nm_id')
-        products = await self.wb_api_utils.get_chars_by_vendor_codes(vendor_codes=list(df['vendor_code']), token_auth=token_auth)
+        ], columns=['product', 'nm_id'])
+
+        products_df = products_df[products_df['nm_id'].isin(nm_ids)]
         return pd.DataFrame([
             {f'{column_prefix}_product': product, f'{column_prefix}_nm_id': product.get('nmID')}
-            for product in products
+            for product in products_df['product']
         ])
 
     async def migrate_chars_full_shop(self, from_shop: Shop, to_shop: Shop, brands):
