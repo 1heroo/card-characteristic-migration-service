@@ -14,7 +14,6 @@ class MigrationServices:
         self.shop_queries = ShopQueries()
 
     async def migrate_chars(self, df: pd.DataFrame, from_nm_id_column: str,
-                            vendor_code_prefix: str,
                             to_nm_id_column: str,
                             from_shop: Shop, to_shop: Shop):
 

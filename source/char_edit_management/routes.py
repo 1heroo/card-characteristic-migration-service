@@ -12,13 +12,12 @@ router = APIRouter(prefix='/characteristic-migration')
 
 
 @router.post('/migrate-characteristics/{from_shop_id}/{to_shop_id}')
-async def migrate_characteristics(vendor_code_prefix: str, from_shop_id: int, to_shop_id: int, file: bytes = File()):
+async def migrate_characteristics(from_shop_id: int, to_shop_id: int, file: bytes = File()):
     df = pd.read_excel(file)
     from_nm_id_column = df['Артикул WB 1'].name
     to_nm_id_column = df['Артикул WB 2'].name
     df = df.dropna(subset=[from_nm_id_column, to_nm_id_column])
     df = df.drop_duplicates(subset=[from_nm_id_column])
-
     from_shop = await migration_services.shop_queries.get_shop_by_id(shop_id=from_shop_id)
     to_shop = await migration_services.shop_queries.get_shop_by_id(shop_id=to_shop_id)
 
@@ -26,7 +25,7 @@ async def migrate_characteristics(vendor_code_prefix: str, from_shop_id: int, to
         return JSONResponse(content={'message': 'Один из магазинов не найден'}, status_code=status.HTTP_404_NOT_FOUND)
 
     await migration_services.migrate_chars(
-        df=df, from_shop=from_shop, to_shop=to_shop, vendor_code_prefix=vendor_code_prefix,
+        df=df, from_shop=from_shop, to_shop=to_shop,
         from_nm_id_column=from_nm_id_column, to_nm_id_column=to_nm_id_column)
 
     return PlainTextResponse(
