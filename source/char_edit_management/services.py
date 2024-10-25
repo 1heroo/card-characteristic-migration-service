@@ -38,6 +38,7 @@ class MigrationServices:
             to_product['characteristics'] = from_product['characteristics']
             to_product['title'] = from_product['title']
             to_product['brand'] = from_product['brand']
+            print(to_product['brand'], from_product['brand'])
             to_product['description'] = from_product['description']
             to_product['dimensions'] = from_product['dimensions']
             products_to_be_imported.append(to_product)
