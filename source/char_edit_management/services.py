@@ -55,7 +55,6 @@ class MigrationServices:
 
             images_to_be_updated.append(img_obj)
 
-
         unique_vendor_codes = []
         unique_products = []
         duplicated_products = []
@@ -70,6 +69,7 @@ class MigrationServices:
 
         print(len(unique_products))
         print(len(duplicated_products))
+        print(unique_products)
         print(images_to_be_updated)
         await self.wb_api_utils.edit_products(token_auth=to_shop_auth, products=unique_products)
         await self.wb_api_utils.edit_products(token_auth=to_shop_auth, products=duplicated_products)
